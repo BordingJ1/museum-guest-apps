@@ -1,0 +1,665 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#14100c">
+<title>Explore &middot; Rosicrucian Egyptian Museum</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600;700&family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;1,400;1,500&family=Noto+Sans+Egyptian+Hieroglyphs&family=Noto+Serif+SC:wght@400;600&family=Noto+Serif+JP:wght@400;600&family=Amiri:ital,wght@0,400;0,700;1,400&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --ink: #14100c;
+    --ink-2: #1c1712;
+    --card: #211a12;
+    --card-edge: #3a3022;
+    --gold: #d9a441;
+    --gold-bright: #e0ad4d;
+    --gold-soft: #c6a15b;
+    --cream: #f4e9d5;
+    --cream-dim: #d6c6a6;
+    --lapis: #4a72c4;
+    --peach: #f0a07d;
+    --moon: #b9c6d8;
+    --display: 'Cinzel', serif;
+    --text: 'Cormorant Garamond', Georgia, serif;
+  }
+
+  /* per-language font fallbacks */
+  html[lang="zh"] { --display: 'Cinzel', 'Noto Serif SC', serif; --text: 'Cormorant Garamond', 'Noto Serif SC', serif; }
+  html[lang="ja"] { --display: 'Cinzel', 'Noto Serif JP', serif; --text: 'Cormorant Garamond', 'Noto Serif JP', serif; }
+  html[lang="ar"] { --display: 'Amiri', serif; --text: 'Amiri', serif; }
+  /* Cinzel has no Vietnamese glyphs — use Cormorant (which does) for display text */
+  html[lang="vi"] { --display: 'Cormorant Garamond', serif; --text: 'Cormorant Garamond', serif; }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  html { -webkit-text-size-adjust: 100%; }
+
+  body {
+    background: var(--ink);
+    color: var(--cream);
+    font-family: var(--text);
+    min-height: 100vh;
+    min-height: 100dvh;
+    padding: max(24px, env(safe-area-inset-top)) 18px max(34px, env(safe-area-inset-bottom));
+    position: relative;
+    overflow-x: hidden;
+  }
+
+  /* faint hieroglyph column watermark */
+  body::before {
+    content: "𓂀 𓋹 𓆣 𓃠 𓅝 𓊹 𓋴 𓎛 𓆑 𓏏";
+    position: fixed;
+    inset: 0;
+    font-family: 'Noto Sans Egyptian Hieroglyphs', serif;
+    font-size: 92px;
+    line-height: 1.55;
+    color: rgba(217, 164, 65, 0.035);
+    white-space: pre-wrap;
+    word-break: break-all;
+    pointer-events: none;
+    z-index: 0;
+    padding: 10px;
+    text-align: center;
+  }
+
+  /* soft top glow */
+  body::after {
+    content: "";
+    position: fixed;
+    top: -180px; left: 50%;
+    width: 560px; height: 360px;
+    transform: translateX(-50%);
+    background: radial-gradient(ellipse at center, rgba(224, 173, 77, 0.10), transparent 65%);
+    pointer-events: none;
+    z-index: 0;
+  }
+
+  .wrap {
+    position: relative;
+    z-index: 1;
+    max-width: 480px;
+    margin: 0 auto;
+  }
+
+  /* ---------- language bar ---------- */
+  .langbar {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 6px;
+    margin-bottom: 26px;
+    animation: rise .7s ease both;
+  }
+
+  .langbtn {
+    font-family: var(--display);
+    font-size: 12px;
+    letter-spacing: .04em;
+    color: var(--cream-dim);
+    background: transparent;
+    border: 1px solid rgba(198, 161, 91, 0.35);
+    border-radius: 999px;
+    padding: 6px 12px;
+    cursor: pointer;
+    -webkit-tap-highlight-color: transparent;
+    transition: color .15s ease, border-color .15s ease, background .15s ease;
+  }
+  .langbtn:active { transform: scale(.96); }
+  .langbtn.on {
+    color: var(--ink);
+    background: var(--gold);
+    border-color: var(--gold);
+    font-weight: 600;
+  }
+
+  /* UDL: visible keyboard focus everywhere */
+  a:focus-visible, button:focus-visible {
+    outline: 2px solid var(--gold-bright);
+    outline-offset: 3px;
+    border-radius: 16px;
+  }
+
+  /* UDL: larger-text mode */
+  .sizebtn { font-weight: 700; letter-spacing: 0; }
+  html.bigtype .sub { font-size: 21px; }
+  html.bigtype .card h2 { font-size: 20px; }
+  html.bigtype .tagline { font-size: 19px; }
+  html.bigtype .chip { font-size: 11.5px; }
+  html.bigtype .langbtn { font-size: 14px; }
+  html.bigtype footer p { font-size: 18px; }
+  html.bigtype h1 { font-size: clamp(30px, 8vw, 38px); }
+
+  /* ---------- header ---------- */
+  header { text-align: center; margin-bottom: 30px; animation: rise .7s ease both; }
+
+  .eyebrow {
+    font-family: var(--display);
+    font-size: 11px;
+    letter-spacing: .30em;
+    color: var(--gold);
+    text-transform: uppercase;
+  }
+
+  .rule {
+    width: 44px; height: 1px;
+    background: var(--gold-soft);
+    margin: 14px auto;
+    position: relative;
+  }
+  .rule::after {
+    content: "𓋹";
+    font-family: 'Noto Sans Egyptian Hieroglyphs', serif;
+    position: absolute;
+    top: 50%; left: 50%;
+    transform: translate(-50%, -52%);
+    background: var(--ink);
+    padding: 0 8px;
+    font-size: 13px;
+    color: var(--gold-soft);
+  }
+
+  h1 {
+    font-family: var(--display);
+    font-weight: 600;
+    font-size: clamp(26px, 7.4vw, 34px);
+    letter-spacing: .045em;
+    color: var(--cream);
+  }
+
+  .sub {
+    font-style: italic;
+    font-size: 18.5px;
+    color: var(--cream-dim);
+    margin-top: 8px;
+    line-height: 1.45;
+  }
+
+  /* ---------- cards ---------- */
+  .apps { display: grid; gap: 14px; }
+
+  .card {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    text-decoration: none;
+    color: inherit;
+    background: linear-gradient(150deg, #241d13, #1b1610 62%);
+    border: 1px solid var(--card-edge);
+    border-radius: 16px;
+    padding: 18px 16px 18px 18px;
+    position: relative;
+    overflow: hidden;
+    box-shadow: 0 10px 26px rgba(0, 0, 0, 0.45), inset 0 1px 0 rgba(244, 233, 213, 0.05);
+    transition: transform .12s ease, border-color .12s ease;
+    animation: rise .7s ease both;
+    -webkit-tap-highlight-color: transparent;
+  }
+  .card:nth-child(1) { animation-delay: .08s; }
+  .card:nth-child(2) { animation-delay: .16s; }
+  .card:nth-child(3) { animation-delay: .24s; }
+  .card:nth-child(4) { animation-delay: .32s; }
+
+  .card:active { transform: scale(.975); border-color: var(--gold-soft); }
+
+  /* giant ghost glyph behind each card */
+  .card .ghost {
+    position: absolute;
+    right: -14px; bottom: -34px;
+    font-family: 'Noto Sans Egyptian Hieroglyphs', serif;
+    font-size: 118px;
+    line-height: 1;
+    color: rgba(244, 233, 213, 0.028);
+    pointer-events: none;
+  }
+  html[dir="rtl"] .card .ghost { right: auto; left: -14px; }
+
+  .medallion {
+    flex: none;
+    width: 64px; height: 64px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-family: 'Noto Sans Egyptian Hieroglyphs', serif;
+    font-size: 30px;
+    border: 1.5px solid;
+    box-shadow: inset 0 0 0 4px var(--ink);
+    position: relative;
+  }
+
+  .body { flex: 1; min-width: 0; }
+
+  .card h2 {
+    font-family: var(--display);
+    font-weight: 600;
+    font-size: 17.5px;
+    letter-spacing: .035em;
+    color: var(--cream);
+    margin-bottom: 3px;
+  }
+
+  .tagline {
+    display: block;
+    font-size: 16.5px;
+    font-style: italic;
+    line-height: 1.32;
+    color: var(--cream-dim);
+  }
+
+  .meta {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 5px 10px;
+    margin-top: 9px;
+  }
+
+  .chip {
+    font-family: var(--display);
+    font-size: 9.5px;
+    letter-spacing: .14em;
+    text-transform: uppercase;
+    color: var(--gold);
+    border: 1px solid rgba(217, 164, 65, 0.35);
+    border-radius: 999px;
+    padding: 3.5px 9px;
+    white-space: nowrap;
+  }
+
+  .go {
+    flex: none;
+    font-family: var(--display);
+    color: var(--gold-soft);
+    font-size: 18px;
+    padding-left: 2px;
+  }
+  html[dir="rtl"] .go { transform: scaleX(-1); padding-left: 0; padding-right: 2px; }
+
+  /* Arabic script must not be letter-spaced (it breaks letter joining),
+     italics are not native to it, and it reads larger at small sizes */
+  html[lang="ar"] .eyebrow { letter-spacing: 0; font-size: 13px; }
+  html[lang="ar"] h1 { letter-spacing: 0; }
+  html[lang="ar"] .card h2 { letter-spacing: 0; }
+  html[lang="ar"] .chip { letter-spacing: 0; font-size: 12px; }
+  html[lang="ar"] .sub, html[lang="ar"] .tagline, html[lang="ar"] footer p { font-style: normal; }
+
+  /* CJK: no italics, slightly tighter sizes for dense glyphs */
+  html[lang="zh"] .sub, html[lang="zh"] .tagline, html[lang="zh"] footer p,
+  html[lang="ja"] .sub, html[lang="ja"] .tagline, html[lang="ja"] footer p { font-style: normal; }
+  html[lang="zh"] .tagline, html[lang="ja"] .tagline { font-size: 14.5px; line-height: 1.5; }
+  html[lang="zh"] .sub, html[lang="ja"] .sub { font-size: 16px; }
+  html[lang="zh"] .chip, html[lang="ja"] .chip { letter-spacing: .06em; font-size: 10.5px; }
+  html[lang="zh"] .eyebrow, html[lang="ja"] .eyebrow { letter-spacing: .18em; }
+
+  /* ---------- footer ---------- */
+  footer {
+    text-align: center;
+    margin-top: 34px;
+    animation: rise .7s ease .4s both;
+  }
+
+  footer .glyphs {
+    font-family: 'Noto Sans Egyptian Hieroglyphs', serif;
+    font-size: 17px;
+    color: var(--gold-soft);
+    letter-spacing: 6px;
+  }
+
+  footer p {
+    font-size: 16px;
+    font-style: italic;
+    color: rgba(203, 183, 143, 0.75);
+    margin-top: 8px;
+    line-height: 1.5;
+  }
+
+  @keyframes rise {
+    from { opacity: 0; transform: translateY(14px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .card, header, footer, .langbar { animation: none; }
+  }
+
+  /* slightly roomier on tablets */
+  @media (min-width: 640px) {
+    .wrap { max-width: 560px; }
+    .card { padding: 22px 20px 22px 22px; }
+  }
+</style>
+</head>
+<body>
+  <div class="wrap">
+
+    <nav class="langbar" id="langbar" aria-label="Language"></nav>
+
+    <header>
+      <div class="eyebrow" data-i18n="museum">Rosicrucian Egyptian Museum</div>
+      <div class="rule"></div>
+      <h1 data-i18n="title">Choose Your Path</h1>
+      <p class="sub"><span data-i18n="sub1">Four ways to explore the ancient world.</span><br><span data-i18n="sub2">Tap one to begin.</span></p>
+    </header>
+
+    <nav class="apps" aria-label="Museum experiences">
+
+      <a class="card night" href="decoded/" data-app>
+        <span class="ghost" aria-hidden="true">𓂀</span>
+        <span class="medallion" aria-hidden="true">𓂀</span>
+        <span class="body">
+          <h2 data-i18n="night_t">Hieroglyphs Decoded</h2>
+          <span class="tagline" data-i18n="night_d">Master the twenty-six signs of the ancient alphabet — and earn your certificate.</span>
+          <span class="meta">
+            <span class="chip" data-i18n="night_time">≈15 min</span>
+            <span class="chip" data-i18n="night_c1">Learn</span>
+            <span class="chip" data-i18n="night_c2">26 signs</span>
+            <span class="chip" data-i18n="night_c3">Certificate</span>
+          </span>
+        </span>
+        <span class="go" aria-hidden="true">›</span>
+      </a>
+
+      <a class="card signs" href="signs/" data-app>
+        <span class="ghost" aria-hidden="true">𓋹</span>
+        <span class="medallion" aria-hidden="true">𓋹</span>
+        <span class="body">
+          <h2 data-i18n="signs_t">Signs of Power</h2>
+          <span class="tagline" data-i18n="signs_d">Twelve ancient symbols, hidden across the gallery. Find them all.</span>
+          <span class="meta">
+            <span class="chip" data-i18n="signs_time">≈20 min</span>
+            <span class="chip" data-i18n="signs_c1">Gallery hunt</span>
+            <span class="chip" data-i18n="signs_c2">12 signs</span>
+          </span>
+        </span>
+        <span class="go" aria-hidden="true">›</span>
+      </a>
+
+      <a class="card cats" href="cats/" data-app>
+        <span class="ghost" aria-hidden="true">𓃠</span>
+        <span class="medallion" aria-hidden="true">𓃠</span>
+        <span class="body">
+          <h2 data-i18n="cats_t">The Golden Cats</h2>
+          <span class="tagline" data-i18n="cats_d">Find every artifact. Wake every cat. A treasure hunt through the whole museum.</span>
+          <span class="meta">
+            <span class="chip" data-i18n="cats_time">≈40 min</span>
+            <span class="chip" data-i18n="cats_c1">Museum tour</span>
+            <span class="chip" data-i18n="cats_c2">9 stops</span>
+            <span class="chip" data-i18n="cats_c3">3 quests</span>
+          </span>
+        </span>
+        <span class="go" aria-hidden="true">›</span>
+      </a>
+
+      <a class="card thoth" href="thoth/" data-app>
+        <span class="ghost" aria-hidden="true">𓅝</span>
+        <span class="medallion" aria-hidden="true">𓅝</span>
+        <span class="body">
+          <h2 data-i18n="thoth_t">Ask Thoth</h2>
+          <span class="tagline" data-i18n="thoth_d">Three taps to a question worth asking. Consult the god of wisdom himself.</span>
+          <span class="meta">
+            <span class="chip" data-i18n="thoth_time">≈5 min</span>
+            <span class="chip" data-i18n="thoth_c1">Oracle</span>
+            <span class="chip" data-i18n="thoth_c2">3 taps</span>
+          </span>
+        </span>
+        <span class="go" aria-hidden="true">›</span>
+      </a>
+
+    </nav>
+
+    <footer>
+      <div class="glyphs" aria-hidden="true">𓋹 𓊽 𓋴</div>
+      <p><span data-i18n="foot1">Life, stability, power.</span><br><span data-i18n="foot2">Questions? Any docent will be glad to help.</span></p>
+    </footer>
+
+  </div>
+
+  <style>
+    /* per-app medallion accents (kept after main styles for clarity) */
+    .card.night   .medallion { color: #e9d9a8; border-color: var(--lapis); background: radial-gradient(circle at 32% 28%, #2a51a3, #16295c 74%); }
+    .card.signs   .medallion { color: var(--ink); border-color: var(--gold-bright); background: radial-gradient(circle at 32% 28%, #f0c473, var(--gold) 74%); }
+    .card.cats    .medallion { color: #2b1608; border-color: var(--peach); background: radial-gradient(circle at 32% 28%, #f8bd9d, #d97e57 76%); }
+    .card.thoth   .medallion { color: var(--ink-2); border-color: var(--moon); background: radial-gradient(circle at 32% 28%, #dde7f2, #8fa1b8 76%); }
+    .card.night:active { border-color: var(--lapis); }
+    .card.cats:active  { border-color: var(--peach); }
+    .card.thoth:active { border-color: var(--moon); }
+  </style>
+
+  <script>
+  (function () {
+    'use strict';
+
+    var LANGS = [
+      { code: 'en', name: 'English' },
+      { code: 'es', name: 'Español' },
+      { code: 'fr', name: 'Français' },
+      { code: 'it', name: 'Italiano' },
+      { code: 'vi', name: 'Tiếng Việt' },
+      { code: 'zh', name: '中文' },
+      { code: 'ja', name: '日本語' },
+      { code: 'ar', name: 'العربية' }
+    ];
+
+    var I18N = {
+      en: {
+        page: 'Explore · Rosicrucian Egyptian Museum',
+        museum: 'Rosicrucian Egyptian Museum',
+        title: 'Choose Your Path',
+        sub1: 'Four ways to explore the ancient world.', sub2: 'Tap one to begin.',
+        night_t: 'Hieroglyphs Decoded', night_d: 'Master the twenty-six signs of the ancient alphabet — and earn your certificate.',
+        night_c1: 'Learn', night_c2: '26 signs', night_c3: 'Certificate',
+        signs_t: 'Signs of Power', signs_d: 'Twelve ancient symbols, hidden across the gallery. Find them all.',
+        signs_c1: 'Gallery hunt', signs_c2: '12 signs',
+        cats_t: 'The Golden Cats', cats_d: 'Find every artifact. Wake every cat. A treasure hunt through the whole museum.',
+        cats_c1: 'Museum tour', cats_c2: '9 stops', cats_c3: '3 quests',
+        thoth_t: 'Ask Thoth', thoth_d: 'Three taps to a question worth asking. Consult the god of wisdom himself.',
+        thoth_c1: 'Oracle', thoth_c2: '3 taps',
+        foot1: 'Life, stability, power.', foot2: 'Questions? Any docent will be glad to help.',
+        night_time: '≈15 min', signs_time: '≈20 min', cats_time: '≈40 min', thoth_time: '≈5 min', textsize: 'Larger text'
+      },
+      es: {
+        page: 'Explora · Museo Egipcio Rosacruz',
+        museum: 'Museo Egipcio Rosacruz',
+        title: 'Elige tu camino',
+        sub1: 'Cuatro maneras de explorar el mundo antiguo.', sub2: 'Toca una para empezar.',
+        night_t: 'Jeroglíficos Descifrados', night_d: 'Domina los veintiséis signos del alfabeto antiguo — y gana tu certificado.',
+        night_c1: 'Aprende', night_c2: '26 signos', night_c3: 'Certificado',
+        signs_t: 'Signos de Poder', signs_d: 'Doce símbolos antiguos, escondidos por la galería. Encuéntralos todos.',
+        signs_c1: 'Búsqueda', signs_c2: '12 signos',
+        cats_t: 'Los Gatos Dorados', cats_d: 'Encuentra cada artefacto. Despierta a cada gato. Una búsqueda del tesoro por todo el museo.',
+        cats_c1: 'Recorrido', cats_c2: '9 paradas', cats_c3: '3 misiones',
+        thoth_t: 'Pregunta a Thot', thoth_d: 'Tres toques para una pregunta que vale la pena. Consulta al dios de la sabiduría.',
+        thoth_c1: 'Oráculo', thoth_c2: '3 toques',
+        foot1: 'Vida, estabilidad, poder.', foot2: '¿Preguntas? Cualquier docente te ayudará con gusto.',
+        night_time: '≈15 min', signs_time: '≈20 min', cats_time: '≈40 min', thoth_time: '≈5 min', textsize: 'Texto más grande'
+      },
+      fr: {
+        page: 'Explorer · Musée Égyptien Rosicrucien',
+        museum: 'Musée Égyptien Rosicrucien',
+        title: 'Choisissez votre chemin',
+        sub1: 'Quatre façons d’explorer le monde antique.', sub2: 'Touchez-en une pour commencer.',
+        night_t: 'Hiéroglyphes Décodés', night_d: 'Maîtrisez les vingt-six signes de l’alphabet antique — et obtenez votre certificat.',
+        night_c1: 'Apprendre', night_c2: '26 signes', night_c3: 'Certificat',
+        signs_t: 'Signes de Pouvoir', signs_d: 'Douze symboles anciens, cachés dans la galerie. Trouvez-les tous.',
+        signs_c1: 'Chasse', signs_c2: '12 signes',
+        cats_t: 'Les Chats Dorés', cats_d: 'Trouvez chaque objet. Réveillez chaque chat. Une chasse au trésor à travers tout le musée.',
+        cats_c1: 'Visite', cats_c2: '9 étapes', cats_c3: '3 quêtes',
+        thoth_t: 'Demandez à Thot', thoth_d: 'Trois gestes pour une question qui en vaut la peine. Consultez le dieu de la sagesse.',
+        thoth_c1: 'Oracle', thoth_c2: '3 gestes',
+        foot1: 'Vie, stabilité, pouvoir.', foot2: 'Des questions ? Un guide se fera un plaisir de vous aider.',
+        night_time: '≈15 min', signs_time: '≈20 min', cats_time: '≈40 min', thoth_time: '≈5 min', textsize: 'Agrandir le texte'
+      },
+      it: {
+        page: 'Esplora · Museo Egizio Rosacroce',
+        museum: 'Museo Egizio Rosacroce',
+        title: 'Scegli il tuo cammino',
+        sub1: 'Quattro modi per esplorare il mondo antico.', sub2: 'Toccane uno per iniziare.',
+        night_t: 'Geroglifici Decifrati', night_d: 'Impara i ventisei segni dell’alfabeto antico — e ottieni il tuo certificato.',
+        night_c1: 'Impara', night_c2: '26 segni', night_c3: 'Certificato',
+        signs_t: 'Segni di Potere', signs_d: 'Dodici simboli antichi, nascosti nella galleria. Trovali tutti.',
+        signs_c1: 'Caccia', signs_c2: '12 segni',
+        cats_t: 'I Gatti d’Oro', cats_d: 'Trova ogni reperto. Sveglia ogni gatto. Una caccia al tesoro in tutto il museo.',
+        cats_c1: 'Percorso', cats_c2: '9 tappe', cats_c3: '3 missioni',
+        thoth_t: 'Chiedi a Thot', thoth_d: 'Tre tocchi per una domanda che vale la pena fare. Consulta il dio della saggezza.',
+        thoth_c1: 'Oracolo', thoth_c2: '3 tocchi',
+        foot1: 'Vita, stabilità, potere.', foot2: 'Domande? Ogni guida sarà lieta di aiutarti.',
+        night_time: '≈15 min', signs_time: '≈20 min', cats_time: '≈40 min', thoth_time: '≈5 min', textsize: 'Testo più grande'
+      },
+      vi: {
+        page: 'Khám phá · Bảo tàng Ai Cập Rosicrucian',
+        museum: 'Bảo tàng Ai Cập Rosicrucian',
+        title: 'Chọn con đường của bạn',
+        sub1: 'Bốn cách khám phá thế giới cổ đại.', sub2: 'Chạm để bắt đầu.',
+        night_t: 'Giải Mã Chữ Tượng Hình', night_d: 'Làm chủ hai mươi sáu ký tự của bảng chữ cái cổ — và nhận chứng chỉ của bạn.',
+        night_c1: 'Học', night_c2: '26 ký tự', night_c3: 'Chứng chỉ',
+        signs_t: 'Dấu Hiệu Quyền Năng', signs_d: 'Mười hai biểu tượng cổ, ẩn khắp phòng trưng bày. Hãy tìm tất cả.',
+        signs_c1: 'Truy tìm', signs_c2: '12 dấu hiệu',
+        cats_t: 'Những Chú Mèo Vàng', cats_d: 'Tìm mọi hiện vật. Đánh thức mọi chú mèo. Cuộc săn kho báu khắp bảo tàng.',
+        cats_c1: 'Tham quan', cats_c2: '9 điểm dừng', cats_c3: '3 nhiệm vụ',
+        thoth_t: 'Hỏi Thần Thoth', thoth_d: 'Ba lần chạm cho một câu hỏi đáng hỏi. Thỉnh vấn vị thần trí tuệ.',
+        thoth_c1: 'Lời tiên tri', thoth_c2: '3 lần chạm',
+        foot1: 'Sự sống, vững bền, quyền năng.', foot2: 'Có thắc mắc? Nhân viên hướng dẫn luôn sẵn lòng giúp bạn.',
+        night_time: '≈15 phút', signs_time: '≈20 phút', cats_time: '≈40 phút', thoth_time: '≈5 phút', textsize: 'Chữ lớn hơn'
+      },
+      zh: {
+        page: '探索 · 蔷薇十字埃及博物馆',
+        museum: '蔷薇十字埃及博物馆',
+        title: '选择你的道路',
+        sub1: '探索古代世界的四种方式。', sub2: '点击开始。',
+        night_t: '象形文字解密', night_d: '掌握古代字母表的二十六个符号，并获得你的证书。',
+        night_c1: '学习', night_c2: '26个符号', night_c3: '证书',
+        signs_t: '力量之符', signs_d: '十二个古老符号，隐藏在展厅各处。把它们全部找到。',
+        signs_c1: '展厅寻宝', signs_c2: '12个符号',
+        cats_t: '黄金猫', cats_d: '找到每件文物，唤醒每只猫。一场贯穿全馆的寻宝之旅。',
+        cats_c1: '博物馆导览', cats_c2: '9个站点', cats_c3: '3个任务',
+        thoth_t: '问托特', thoth_d: '三次点击，问出一个值得问的问题。请教智慧之神。',
+        thoth_c1: '神谕', thoth_c2: '3次点击',
+        foot1: '生命、稳定、力量。', foot2: '有问题吗？讲解员乐意为您服务。',
+        night_time: '约15分钟', signs_time: '约20分钟', cats_time: '约40分钟', thoth_time: '约5分钟', textsize: '放大文字'
+      },
+      ja: {
+        page: '探検 · 薔薇十字エジプト博物館',
+        museum: '薔薇十字エジプト博物館',
+        title: '道を選ぼう',
+        sub1: '古代世界を探検する4つの方法。', sub2: 'タップして始めよう。',
+        night_t: 'ヒエログリフ解読', night_d: '古代アルファベットの26の文字をマスターして、修了証を手に入れよう。',
+        night_c1: '学ぶ', night_c2: '26文字', night_c3: '修了証',
+        signs_t: '力のしるし', signs_d: 'ギャラリーに隠された12の古代シンボル。すべて見つけよう。',
+        signs_c1: '探索', signs_c2: '12のしるし',
+        cats_t: '黄金の猫たち', cats_d: 'すべての遺物を見つけて、すべての猫を目覚めさせよう。博物館全体をめぐる宝探し。',
+        cats_c1: 'ツアー', cats_c2: '9か所', cats_c3: '3つのクエスト',
+        thoth_t: 'トトに聞く', thoth_d: '3回のタップで、問う価値のある質問を。知恵の神に尋ねてみよう。',
+        thoth_c1: '神託', thoth_c2: '3タップ',
+        foot1: '生命、安定、力。', foot2: 'ご質問は？係員がお手伝いします。',
+        night_time: '約15分', signs_time: '約20分', cats_time: '約40分', thoth_time: '約5分', textsize: '文字を大きく'
+      },
+      ar: {
+        page: 'استكشف · المتحف المصري الروزيكروشي',
+        museum: 'المتحف المصري الروزيكروشي',
+        title: 'اختر طريقك',
+        sub1: 'أربع طرق لاستكشاف العالم القديم.', sub2: 'اضغط على واحدة للبدء.',
+        night_t: 'فك رموز الهيروغليفية', night_d: 'أتقن الرموز الستة والعشرين للأبجدية القديمة — واحصل على شهادتك.',
+        night_c1: 'تعلّم', night_c2: '٢٦ رمزًا', night_c3: 'شهادة',
+        signs_t: 'رموز القوة', signs_d: 'اثنا عشر رمزًا قديمًا مخبأة في أرجاء القاعة. اعثر عليها كلها.',
+        signs_c1: 'بحث في القاعة', signs_c2: '١٢ رمزًا',
+        cats_t: 'القطط الذهبية', cats_d: 'اعثر على كل قطعة أثرية. أيقظ كل قطة. رحلة بحث عن الكنز في أنحاء المتحف.',
+        cats_c1: 'جولة', cats_c2: '٩ محطات', cats_c3: '٣ مهام',
+        thoth_t: 'اسأل تحوت', thoth_d: 'ثلاث لمسات لسؤال يستحق أن يُطرح. استشر إله الحكمة بنفسه.',
+        thoth_c1: 'عرّافة', thoth_c2: '٣ لمسات',
+        foot1: 'حياة، ثبات، قوة.', foot2: 'لديك سؤال؟ يسعد أي مرشد بمساعدتك.',
+        night_time: '≈١٥ دقيقة', signs_time: '≈٢٠ دقيقة', cats_time: '≈٤٠ دقيقة', thoth_time: '≈٥ دقائق', textsize: 'تكبير النص'
+      }
+    };
+
+    function savedLang() {
+      try { return localStorage.getItem('remLang'); } catch (e) { return null; }
+    }
+    function saveLang(code) {
+      try { localStorage.setItem('remLang', code); } catch (e) { /* private mode */ }
+    }
+
+    function detectLang() {
+      var param = new URLSearchParams(location.search).get('lang');
+      if (param && I18N[param]) return param;
+      var saved = savedLang();
+      if (saved && I18N[saved]) return saved;
+      var navs = navigator.languages || [navigator.language || 'en'];
+      for (var i = 0; i < navs.length; i++) {
+        var base = String(navs[i]).slice(0, 2).toLowerCase();
+        if (I18N[base]) return base;
+      }
+      return 'en';
+    }
+
+    function apply(code) {
+      var dict = I18N[code] || I18N.en;
+      document.documentElement.setAttribute('lang', code);
+      document.documentElement.setAttribute('dir', code === 'ar' ? 'rtl' : 'ltr');
+      document.title = dict.page;
+
+      var nodes = document.querySelectorAll('[data-i18n]');
+      for (var i = 0; i < nodes.length; i++) {
+        var key = nodes[i].getAttribute('data-i18n');
+        if (dict[key]) nodes[i].textContent = dict[key];
+      }
+
+      // carry the language into each app
+      var links = document.querySelectorAll('a[data-app]');
+      for (var j = 0; j < links.length; j++) {
+        var url = new URL(links[j].href);
+        url.searchParams.set('lang', code);
+        links[j].href = url.toString();
+      }
+
+      // reflect active state in the language bar (aria-pressed for AT users)
+      var btns = document.querySelectorAll('.langbtn[data-lang]');
+      for (var k = 0; k < btns.length; k++) {
+        var on = btns[k].getAttribute('data-lang') === code;
+        btns[k].classList.toggle('on', on);
+        btns[k].setAttribute('aria-pressed', on ? 'true' : 'false');
+      }
+      var sb = document.getElementById('sizeBtn');
+      if (sb) sb.setAttribute('aria-label', dict.textsize || I18N.en.textsize);
+
+      saveLang(code);
+    }
+
+    // build the language bar
+    var bar = document.getElementById('langbar');
+    LANGS.forEach(function (l) {
+      var b = document.createElement('button');
+      b.type = 'button';
+      b.className = 'langbtn';
+      b.setAttribute('data-lang', l.code);
+      b.setAttribute('aria-label', l.name);
+      b.textContent = l.name;
+      b.addEventListener('click', function () { apply(l.code); });
+      bar.appendChild(b);
+    });
+
+    // UDL: larger-text toggle
+    var sizeBtn = document.createElement('button');
+    sizeBtn.type = 'button';
+    sizeBtn.id = 'sizeBtn';
+    sizeBtn.className = 'langbtn sizebtn';
+    sizeBtn.textContent = 'Aa';
+    function setBig(onFlag) {
+      document.documentElement.classList.toggle('bigtype', onFlag);
+      sizeBtn.setAttribute('aria-pressed', onFlag ? 'true' : 'false');
+      sizeBtn.classList.toggle('on', onFlag);
+      try { localStorage.setItem('remBig', onFlag ? '1' : ''); } catch (e) { /* private mode */ }
+    }
+    sizeBtn.addEventListener('click', function () {
+      setBig(!document.documentElement.classList.contains('bigtype'));
+    });
+    bar.appendChild(sizeBtn);
+    var savedBig = null;
+    try { savedBig = localStorage.getItem('remBig'); } catch (e) { /* private mode */ }
+    setBig(savedBig === '1');
+
+    apply(detectLang());
+  })();
+  </script>
+</body>
+</html>
